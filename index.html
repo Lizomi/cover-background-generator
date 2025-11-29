@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apple Music Style Dynamic Background Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="controls">
+            <h1>动态背景生成器</h1>
+            <div class="control-group">
+                <label for="imageInput" class="file-upload">
+                    选择图片
+                    <input type="file" id="imageInput" accept="image/*">
+                </label>
+            </div>
+
+            <div class="control-group">
+                <label for="speedRange">运动速率 (Speed)</label>
+                <input type="range" id="speedRange" min="0.1" max="5.0" step="0.1" value="1.0">
+            </div>
+
+            <div class="control-group">
+                <label for="durationSelect">录制时长</label>
+                <select id="durationSelect">
+                    <option value="5000" selected>5 秒</option>
+                    <option value="15000">15 秒</option>
+                    <option value="30000">30 秒</option>
+                    <option value="60000">1 分钟</option>
+                    <option value="300000">5 分钟</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>画布/导出分辨率</label>
+                <select id="resolutionSelect">
+                    <option value="window">当前窗口 (Window)</option>
+                    <option value="1920x1080" selected>1080p (1920x1080)</option>
+                    <option value="3840x2160">4K (3840x2160)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label>录制帧率 (FPS)</label>
+                <select id="fpsSelect">
+                    <option value="30">30 FPS</option>
+                    <option value="60" selected>60 FPS</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <button id="recordBtn">开始录制 (5s)</button>
+                <span id="status"></span>
+            </div>
+            
+            <div class="preview-image-container">
+                <img id="previewImage" src="" alt="Source Image" style="display: none;">
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="glCanvas"></canvas>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
