@@ -9,6 +9,12 @@ const speedRange = document.getElementById('speedRange');
 const fpsSelect = document.getElementById('fpsSelect');
 const durationInput = document.getElementById('durationInput');
 
+// Overlay Elements
+const recordingOverlay = document.getElementById('recordingOverlay');
+const progressFill = document.getElementById('progressFill');
+const timeRemaining = document.getElementById('timeRemaining');
+const cancelBtn = document.getElementById('cancelBtn');
+
 let extractedColors = [
     [0.8, 0.2, 0.2], // Default Red
     [0.2, 0.8, 0.2], // Default Green
@@ -385,13 +391,55 @@ imageInput.addEventListener('change', (e) => {
 });
 
 // --- Recording Logic ---
+let recorder = null;
+let recordingInterval = null;
+let audioContext = null;
+let wakeLock = null;
 
-recordBtn.addEventListener('click', () => {
+function formatTime(ms) {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = (totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+function stopRecording() {
+    if (recorder && recorder.state !== 'inactive') {
+        recorder.stop();
+    }
+    if (recordingInterval) clearInterval(recordingInterval);
+    if (audioContext) audioContext.close();
+    if (wakeLock) wakeLock.release().then(() => wakeLock = null);
+
+    recordingOverlay.style.display = 'none';
+    recordBtn.disabled = false;
+    statusSpan.textContent = "Done!";
+}
+
+cancelBtn.addEventListener('click', () => {
+    // Cancel logic: Stop but don't download (relying on recorder.onstop checks or just reloading state)
+    // Actually MediaRecorder API saves blob on stop. We can just discard it.
+    // We'll modify the onstop handler slightly.
+    if (recorder) {
+        recorder.onstop = null; // Remove handler so it doesn't download
+        recorder.stop();
+    }
+    if (recordingInterval) clearInterval(recordingInterval);
+    if (audioContext) audioContext.close();
+    recordingOverlay.style.display = 'none';
+    recordBtn.disabled = false;
+    statusSpan.textContent = "Cancelled";
+});
+
+recordBtn.addEventListener('click', async () => {
     const fps = parseInt(fpsSelect.value) || 60;
+    const durationSeconds = parseInt(durationInput.value) || 5;
+    const durationMs = durationSeconds * 1000;
+    
     const stream = canvas.captureStream(fps); 
-    const recorder = new MediaRecorder(stream, {
+    recorder = new MediaRecorder(stream, {
         mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 25000000 // Higher bitrate for better quality (25Mbps)
+        videoBitsPerSecond: 25000000 // 25Mbps
     });
     
     const chunks = [];
@@ -401,22 +449,60 @@ recordBtn.addEventListener('click', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'dynamic_background.webm';
+        a.download = `coverbg_${durationSeconds}s.webm`;
         a.click();
         URL.revokeObjectURL(url);
         statusSpan.textContent = "Done!";
         recordBtn.disabled = false;
     };
 
+    // --- Background Throttling Prevention Hack ---
+    // Create an AudioContext and play a silent sound.
+    // This trick often forces browsers to keep the tab priority high.
+    try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioContext = new AudioContext();
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        gain.gain.value = 0.001; // Practically silent but active
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+        osc.start();
+    } catch (e) {
+        console.warn("AudioContext hack failed", e);
+    }
+    
+    // Request Wake Lock (if supported)
+    if ('wakeLock' in navigator) {
+        try {
+            wakeLock = await navigator.wakeLock.request('screen');
+        } catch (err) {
+            console.warn(`Wake Lock error: ${err.name}, ${err.message}`);
+        }
+    }
+
     recorder.start();
     recordBtn.disabled = true;
-    statusSpan.textContent = "Recording...";
+    
+    // Show Overlay
+    recordingOverlay.style.display = 'flex';
+    progressFill.style.width = '0%';
+    timeRemaining.textContent = `剩余时间: ${formatTime(durationMs)}`;
 
-    const durationSeconds = parseInt(durationInput.value) || 5; // Default to 5 seconds
-    const durationMs = durationSeconds * 1000;
-    setTimeout(() => {
-        recorder.stop();
-    }, durationMs);
+    const startTime = Date.now();
+    
+    recordingInterval = setInterval(() => {
+        const elapsed = Date.now() - startTime;
+        const remaining = Math.max(0, durationMs - elapsed);
+        const percent = Math.min(100, (elapsed / durationMs) * 100);
+        
+        progressFill.style.width = `${percent}%`;
+        timeRemaining.textContent = `剩余时间: ${formatTime(remaining)}`;
+
+        if (elapsed >= durationMs) {
+            stopRecording();
+        }
+    }, 100); // Update UI every 100ms
 });
 
 // --- Init ---

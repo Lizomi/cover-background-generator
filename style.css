@@ -1,3 +1,5 @@
+/* ... previous styles ... */
+
 body {
     margin: 0;
     padding: 0;
@@ -24,7 +26,7 @@ body {
     gap: 20px;
     z-index: 10;
     box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    overflow-y: auto; /* Allow scrolling if controls get too tall */
+    overflow-y: auto; 
 }
 
 .canvas-container {
@@ -34,12 +36,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Ensure canvas doesn't overflow container visually */
     overflow: hidden; 
 }
 
 canvas {
-    /* Default behavior, will be overridden by JS for fixed ratios */
     max-width: 100%;
     max-height: 100%;
     box-shadow: 0 0 20px rgba(0,0,0,0.3);
@@ -109,14 +109,13 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 input[type="number"] {
-    -moz-appearance: textfield; /* Firefox */
+    -moz-appearance: textfield;
 }
 input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
-
 
 button {
     background-color: #007AFF;
@@ -144,4 +143,53 @@ button:disabled {
 #status {
     font-size: 0.8rem;
     color: #aaa;
+}
+
+/* Overlay Styles */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.overlay-content {
+    background-color: #222;
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 10px;
+    background-color: #444;
+    border-radius: 5px;
+    margin: 20px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #007AFF;
+    width: 0%;
+    transition: width 0.2s linear;
+}
+
+#cancelBtn {
+    background-color: #ff3b30;
+    margin-top: 20px;
+}
+
+#cancelBtn:hover {
+    background-color: #d63028;
 }
