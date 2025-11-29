@@ -7,7 +7,7 @@ const statusSpan = document.getElementById('status');
 const resolutionSelect = document.getElementById('resolutionSelect');
 const speedRange = document.getElementById('speedRange');
 const fpsSelect = document.getElementById('fpsSelect');
-const durationSelect = document.getElementById('durationSelect');
+const durationInput = document.getElementById('durationInput');
 
 let extractedColors = [
     [0.8, 0.2, 0.2], // Default Red
@@ -412,10 +412,11 @@ recordBtn.addEventListener('click', () => {
     recordBtn.disabled = true;
     statusSpan.textContent = "Recording...";
 
-    const duration = parseInt(durationSelect.value) || 5000; // Default to 5 seconds
+    const durationSeconds = parseInt(durationInput.value) || 5; // Default to 5 seconds
+    const durationMs = durationSeconds * 1000;
     setTimeout(() => {
         recorder.stop();
-    }, duration);
+    }, durationMs);
 });
 
 // --- Init ---
