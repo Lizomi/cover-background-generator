@@ -1,4 +1,5 @@
 # Dynamic Cover Background Generator
+![preview](https://github.com/user-attachments/assets/1192d85d-24f8-471c-84ac-d6d2e67cddf6)
 
 ## Overview
 
