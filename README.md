@@ -1,4 +1,6 @@
 # Dynamic Cover Background Generator
+
+Try at: https://coverbg.lizomi.top
 ![preview](https://github.com/user-attachments/assets/1192d85d-24f8-471c-84ac-d6d2e67cddf6)
 
 ## Overview
